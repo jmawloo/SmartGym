@@ -19,13 +19,18 @@ const DescriptorCard = ({ descriptor }: DescriptorCardProps) => {
   }, []);
   return (
     <View style={styles.container}>
-      <Text>
+      <Text style={styles.text}>
         {descriptor.id + ' -> ' + Base64.decode(value) + '(' + value + ')'}
       </Text>
     </View>
   );
 };
 
-const styles = StyleSheet.create({ container: {} });
+const styles = StyleSheet.create({
+  container: {},
+  text: {
+    color: 'black',
+  },
+});
 
 export { DescriptorCard };

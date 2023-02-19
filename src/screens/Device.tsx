@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Text, ScrollView, Button, View, StyleSheet } from 'react-native';
 import { Service } from 'react-native-ble-plx';
 import { ServiceCard } from '../components/ServiceCard';
+import { Base64 } from '../lib/base64';
 import { RootStackParamList } from '../navigation/index';
 
 const DeviceScreen = ({
@@ -34,6 +35,7 @@ const DeviceScreen = ({
       const allServicesAndCharacteristics = await connectedDevice.discoverAllServicesAndCharacteristics();
       // get the services only
       const discoveredServices = await allServicesAndCharacteristics.services();
+      console.warn(JSON.stringify(discoveredServices));
       setServices(discoveredServices);
     };
 
@@ -58,7 +60,9 @@ const DeviceScreen = ({
           <Text>{`Name : ${device.name}`}</Text>
           <Text>{`Is connected : ${isConnected}`}</Text>
           <Text>{`RSSI : ${device.rssi}`}</Text>
-          <Text>{`Manufacturer : ${device.manufacturerData}`}</Text>
+          <Text>{`Manufacturer : ${Base64.decode(
+            device.manufacturerData,
+          )}`}</Text>
           <Text>{`ServiceData : ${device.serviceData}`}</Text>
           <Text>{`UUIDS : ${device.serviceUUIDs}`}</Text>
         </View>

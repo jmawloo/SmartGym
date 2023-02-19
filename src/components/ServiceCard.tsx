@@ -37,7 +37,7 @@ const ServiceCard = ({ service }: ServiceCardProps) => {
         onPress={() => {
           setAreCharacteristicsVisible((prev) => !prev);
         }}>
-        <Text>{`UUID : ${service.uuid}`}</Text>
+        <Text style={styles.text}>{`UUID : ${service.uuid}`}</Text>
       </TouchableOpacity>
 
       {areCharacteristicsVisible &&
@@ -63,6 +63,9 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 4,
     padding: 12,
+  },
+  text: {
+    color: 'black',
   },
 });
 

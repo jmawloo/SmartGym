@@ -58,14 +58,14 @@ const CharacteristicCard = ({ char }: CharacteristicCardProps) => {
       onPress={writeCharacteristic}>
       <Text style={styles.measure}>{measure}</Text>
       <Text style={styles.descriptor}>{descriptor}</Text>
-      <Text>{`isIndicatable : ${char.isIndicatable}`}</Text>
-      <Text>{`isNotifiable : ${char.isNotifiable}`}</Text>
-      <Text>{`isNotifying : ${char.isNotifying}`}</Text>
-      <Text>{`isReadable : ${char.isReadable}`}</Text>
+      <Text style={styles.text}>{`isIndicatable : ${char.isIndicatable}`}</Text>
+      <Text style={styles.text}>{`isNotifiable : ${char.isNotifiable}`}</Text>
+      <Text style={styles.text}>{`isNotifying : ${char.isNotifying}`}</Text>
+      <Text style={styles.text}>{`isReadable : ${char.isReadable}`}</Text>
       <TouchableOpacity>
-        <Text>{`isWritableWithResponse : ${char.isWritableWithResponse}`}</Text>
+        <Text style={styles.text}>{`isWritableWithResponse : ${char.isWritableWithResponse}`}</Text>
       </TouchableOpacity>
-      <Text>{`isWritableWithoutResponse : ${char.isWritableWithoutResponse}`}</Text>
+      <Text style={styles.text}>{`isWritableWithoutResponse : ${char.isWritableWithoutResponse}`}</Text>
     </TouchableOpacity>
   );
 };
@@ -83,6 +83,9 @@ const styles = StyleSheet.create({
   },
   measure: { color: 'red', fontSize: 24 },
   descriptor: { color: 'blue', fontSize: 24 },
+  text: {
+    color: 'black',
+  },
 });
 
 export { CharacteristicCard };

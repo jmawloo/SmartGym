@@ -10,10 +10,12 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 import { DeviceCard } from '../components/DeviceCard';
-import { BleManager, Device } from 'react-native-ble-plx';
+import { BleManager, Device, DeviceId } from 'react-native-ble-plx';
 import { theme } from '../theme';
+import { Base64 } from '../lib/base64';
 
 const manager = new BleManager();
+const HC05_UUID = "00001101-0000-1000-8000-00805F9B34FB";
 
 // Reducer to add only the devices which have not been added yet
 // When the bleManager search for devices, each time it detect a ble device, it returns the ble device even if this one has already been returned
@@ -51,18 +53,41 @@ const HomeScreen = () => {
     // scan devices
     manager.startDeviceScan(null, null, (error, scannedDevice) => {
       if (error) {
-        console.warn(error);
+        console.warn(JSON.stringify(error));
       }
 
       // if a device is detected add the device to the list by dispatching the action into the reducer
-      if (scannedDevice) {
-        dispatch({ type: 'ADD_DEVICE', payload: scannedDevice });
+      if (
+        scannedDevice 
+        // &&
+        // (scannedDevice.name !== null ||
+        //   scannedDevice.localName !== null 
+        //   // ||(scannedDevice.rssi || 0) >= -50
+        //   )
+      ) {
+        // console.warn(
+        //   Base64.decode(scannedDevice.manufacturerData?.replace(/[=]/g, '')),
+        // );
+        dispatch({type: 'ADD_DEVICE', payload: scannedDevice});
       }
     });
-
+    
     // stop scanning devices after 5 seconds
-    setTimeout(() => {
+    setTimeout(async () => {
       manager.stopDeviceScan();
+      // Check if device is valid
+      // const devices: Device[] = await manager.devices(scannedDevices.map(d => d.id));
+      console.warn("getting UUID");
+      const devices: Device[] = await manager.devices([HC05_UUID]);
+      // const connDevices: Device[] = await manager.connectedDevices(scannedDevices.map(d => d.serviceUUIDs ?? []).flat());
+      const connDevices: Device[] = await manager.connectedDevices([HC05_UUID]);
+      if (devices.length !== 0) {
+        console.warn(JSON.stringify(devices));
+      } else if (connDevices.length !== 0) {
+        console.warn(JSON.stringify(connDevices));
+      } else {
+        console.warn("no usable devices found");
+      }
       setIsLoading(false);
     }, 5000);
   };
@@ -97,7 +122,11 @@ const HomeScreen = () => {
     <SafeAreaView style={styles.body}>
       <FlatList
         keyExtractor={(item) => item.id}
-        data={scannedDevices}
+        data={[...scannedDevices].sort(
+          (da, db) =>
+            ((da.txPowerLevel || 0) - (db.txPowerLevel || 0)) ||
+            ((db.rssi || 0) - (da.rssi || 0)),
+        )}
         renderItem={({ item }) => <DeviceCard device={item} />}
         ListHeaderComponent={ListHeaderComponent}
         contentContainerStyle={styles.content}
