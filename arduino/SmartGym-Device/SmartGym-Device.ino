@@ -57,6 +57,9 @@ void updateSetupLCD(unsigned int c1, unsigned int c2,bool confirmOption) {
   lcd.setCursor(0,0);
   if (confirmOption){
     lcd.print("Confirmed");
+    delay(500);
+    lcd.clear();
+
   } else {
     lcd.print("Sets: ");
     lcd.print(c1);
@@ -78,6 +81,7 @@ void updateSetupLCD(unsigned int c1, unsigned int c2,bool confirmOption) {
     digitalWrite(trigPin, LOW);
     duration = pulseIn(echoPin, HIGH);
     distance = (duration/2) / 29.1;
+    updateRepLCD(repsLeft, setsLeft,iscomplete);
     if (distance < 20){
         
         Serial.println("one rep detected");
@@ -152,8 +156,8 @@ void loop() {
         shouldUpdateLCD = true;
         confirm=0;
         state=1;
-        repsassigned = repsLeft = count1;
-        setsLeft=count2; 
+        repsassigned = repsLeft = count2;
+        setsLeft=count1; 
       }  
       // UPDATE LCD if needed:
       // Will also update when board first runs.
