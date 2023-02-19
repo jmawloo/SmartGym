@@ -39,7 +39,6 @@ int confirm=0;
 int state = 0;
 
 
-
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);

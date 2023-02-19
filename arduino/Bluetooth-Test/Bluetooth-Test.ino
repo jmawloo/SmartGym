@@ -33,25 +33,55 @@
 const int PIN_R = 2, PIN_G = 3, PIN_B = 4;
 const int BT_BAUD = 38400, DEV_BAUD = 9600;
 
-
+const int BUF_SIZE = 1024;
+const char TERM_CHAR = '\n';
 
 // other variables
+static const unsigned long rates[] =
+    {4800,9600,19200,38400,57600,115200};
+
 // Create variables to check characteristics have been created successful
 int counterChannel;
 int elevationChannel;
 
 // Initialize the counter to 0
-int counter = 0;
+int counter = 0, state = 0;
+
+String buffer;
 
 
 // HELPER FUNCTIONS
 
 // error handling
-void error(const __FlashStringHelper*err) {
-  Serial.println(err);
-  digitalWrite(pinR, 255);
-  while (1);
-}
+// void error(const __FlashStringHelper*err) {
+//   Serial.println(err);
+//   digitalWrite(pinR, 255);
+//   while (1);
+// }
+
+// void readUntilTerm() {
+//   static byte ndx = 0;
+//     char endMarker = '\n';
+//     char rc;
+    
+//     while (Serial1.available() > 0 && newData == false) {
+//       rc = Serial1.read();
+
+//       if (rc != endMarker) {
+//           receivedChars[ndx] = rc;
+//           ndx++;
+//           if (ndx >= numChars) {
+//               ndx = numChars - 1;
+//           }
+//       }
+//       else {
+//           receivedChars[ndx] = '\0'; // terminate the string
+//           ndx = 0;
+//           newData = true;
+//       }
+//     }
+// }
+
 
 void setup() {
   pinMode(PIN_R, OUTPUT);
@@ -63,27 +93,48 @@ void setup() {
   digitalWrite(PIN_B, LOW);
 
   // Verify if the serial port is available, and initialize it to display some information
-  while(!Serial) {
+  while(!Serial1) {
     delay(500);
   }
 
   Serial.begin(DEV_BAUD); // Default communication rate of the Bluetooth module
+  Serial1.begin(BT_BAUD);
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
-  if(Serial.available() > 0){ // Checks whether data is comming from the serial port
-    state = Serial.read(); // Reads the data from the serial port
+  if(Serial1.available() > 0){ // Checks whether data is comming from the serial port
+    buffer = Serial1.read(); // Reads the data from the serial port
+    Serial.println("Available");
+
   }
 
-  if (state == '0') {
+  Serial.println((int) buffer[0]);
+  // Serial.println(buffer);
+  // Serial.println((int) buffer.c_str()[1]);
+  // Serial.println(buffer.c_str());
+  delay(500);
+
+
+  if (buffer[0] == '0' || state == 1) {
     digitalWrite(PIN_R, LOW); // Turn LED OFF
-    Serial.println("LED: OFF"); // Send back, to the phone, the String "LED: OFF"
+    // Serial1.println("LED: OFF"); // Send back, to the phone, the String "LED: OFF"
+    Serial.println("LED: off");
+    state = 1;
+    // Ensure available for writing:
+    if (Serial1.availableForWrite() >= 10) {
+      if (Serial1.println("1;3;3600") > 0) { // reps, sets, elapsed total time since beginning.
+        Serial.println("This works");
+        state = 0;
+      }
+    }
+    
+  }
+  else if (buffer[0] == '1') {
+    digitalWrite(PIN_R, HIGH);
+    Serial1.println("LED: ON");
+    Serial.println("LED: on");
     state = 0;
   }
-  else if (state == '1') {
-    digitalWrite(PIN_R, HIGH);
-    Serial.println("LED: ON");;
-    state = 1;
-  } 
+  buffer = "";
 }
