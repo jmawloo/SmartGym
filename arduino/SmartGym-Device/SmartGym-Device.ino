@@ -2,10 +2,16 @@
 
 #include <LiquidCrystal.h>
 #include <ezButton.h>
+#include <Arduino.h>
 
 // Assign pins:
 const int RS = 11, EN = 12;
 const int D4 = 2, D5 = 3, D6 = 4, D7 = 5;
+
+const int BT_BAUD = 38400, DEV_BAUD = 9600;
+
+const int BUF_SIZE = 1024;
+const char TERM_CHAR = '\n';
 
 //// Part 2)
   const int trigPin=10;
@@ -36,19 +42,25 @@ int confirm=0;
 // STATE MACHINE LOGIC
 // 0 = SETUP
 // 1 = CONFIRMED + REP + SET COUNTDOWN
-int state = 0;
+int state = 0, state2 = 0;
 
 
 void setup() {
   // put your setup code here, to run once:
-  Serial.begin(9600);
+  Serial.begin(DEV_BAUD);
   lcd.begin(16, 2); // Set LCD's # cols + rows (in that order!)
   incVal.setDebounceTime(DEBOUNCE_TIME_MS);
   decVal.setDebounceTime(DEBOUNCE_TIME_MS);
   nxtLine.setDebounceTime(DEBOUNCE_TIME_MS);
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
-    
+
+  // Setup bluetooth:
+  // Verify if the serial port is available, and initialize it to display some information
+  while(!Serial1) {
+    delay(500);
+  }
+  Serial1.begin(BT_BAUD);
 }
 
 void updateSetupLCD(unsigned int c1, unsigned int c2,bool confirmOption) {
@@ -129,6 +141,31 @@ void updateRepLCD(unsigned int* repsLeft, unsigned int* setsLeft, bool iscomplet
 void loop() {
   // put your main code here, to run repeatedly:
   incVal.loop(); decVal.loop(); nxtLine.loop();
+
+  // For bluetooth connection
+  if(Serial1.available() > 0){ // Checks whether data is comming from the serial port
+    buffer = Serial1.read(); // Reads the data from the serial port
+    Serial.println("Available");
+
+    if (buffer[0] == '0' || state2 == 1) {
+      digitalWrite(PIN_R, LOW); // Turn LED OFF
+      // Serial1.println("LED: OFF"); // Send back, to the phone, the String "LED: OFF"
+      // Serial.println("LED: off");
+      state2 = 1;
+      // Ensure available for writing:
+      if (Serial1.availableForWrite() >= 10) {
+        if (Serial1.println("1;3;3600") > 0) { // reps, sets, elapsed total time since beginning.
+          state2 = 0;
+        }
+      }
+    }
+    else if (buffer[0] == '1') {
+      digitalWrite(PIN_R, HIGH);
+      // Serial.println("LED: on");
+      state2 = 0;
+    }
+    buffer = "";
+  }
 
   switch (state) {
     case 0:

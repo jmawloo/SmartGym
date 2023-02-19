@@ -1,5 +1,5 @@
 // NOTE: Before you run the code:
-// 1) Unplug the RX/TX pins before uploading to Arduino!!
+// 1) Pair to HC05 device on phone
 // 2) Default password 1234
 
 
@@ -45,7 +45,7 @@ int counterChannel;
 int elevationChannel;
 
 // Initialize the counter to 0
-int counter = 0, state = 0;
+int counter = 0, state2 = 0;
 
 String buffer;
 
@@ -106,7 +106,6 @@ void loop() {
   if(Serial1.available() > 0){ // Checks whether data is comming from the serial port
     buffer = Serial1.read(); // Reads the data from the serial port
     Serial.println("Available");
-
   }
 
   Serial.println((int) buffer[0]);
@@ -116,16 +115,16 @@ void loop() {
   delay(500);
 
 
-  if (buffer[0] == '0' || state == 1) {
+  if (buffer[0] == '0' || state2 == 1) {
     digitalWrite(PIN_R, LOW); // Turn LED OFF
     // Serial1.println("LED: OFF"); // Send back, to the phone, the String "LED: OFF"
     Serial.println("LED: off");
-    state = 1;
+    state2 = 1;
     // Ensure available for writing:
     if (Serial1.availableForWrite() >= 10) {
       if (Serial1.println("1;3;3600") > 0) { // reps, sets, elapsed total time since beginning.
         Serial.println("This works");
-        state = 0;
+        state2 = 0;
       }
     }
     
@@ -134,7 +133,7 @@ void loop() {
     digitalWrite(PIN_R, HIGH);
     Serial1.println("LED: ON");
     Serial.println("LED: on");
-    state = 0;
+    state2 = 0;
   }
   buffer = "";
 }
